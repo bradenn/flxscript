@@ -1,0 +1,194 @@
+<!-- Include Quill stylesheet -->
+<link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet">
+<link href="https://bootswatch.com/4/cosmo/bootstrap.css" rel="stylesheet">
+<!-- Create the toolbar container -->
+
+
+<style>
+.ql-editor {
+      line-height: 17px;
+}
+.ql-container.ql-snow{
+  border:none;
+}
+.bg-dark{
+  color: rgb(215, 218, 223) !important;
+  background-color: rgb(41, 44, 52) !important;
+}
+div.feditor{
+  font-family: "Courier 10 Pitch", "Courier", monospace;
+font-size: 16px;
+line-height: 17px;
+outline: none;
+
+min-height: 11in;
+margin: auto;
+max-width: 8.5in;
+padding-top: 1in;
+padding-bottom: 1in;
+padding-right: 1in;
+padding-left: 1.5in;
+word-wrap: break-word;
+white-space: pre-wrap;
+font-size: 100%;
+border:none;
+box-shadow: 0 0 4px 0 rgba(0,0,0,0.3);
+color: rgb(215, 218, 223);
+background-color: rgb(41, 44, 52);
+}
+
+div.fcontainer{
+
+}
+
+div.fbody{
+
+}
+div.ftoolbar{
+  display: none;
+  margin: auto;
+  max-width: 8.5in;
+}
+body{
+  background-color: rgb(34, 37, 43);
+}
+
+</style>
+
+<!-- Create the editor container -->
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+    <a class="navbar-brand" href="#">Flix Script</a>
+
+
+
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+
+      </ul>
+      <ul class="navbar-nav navbar-right">
+        <li class="nav-item">
+          <a class="nav-link btn btn-primary" id="save" href="#">SAVE</a>
+        </li>
+
+      </ul>
+
+  </div>
+  </nav>
+
+<div class="fbody">
+  <div id="toolbar" class="ftoolbar">
+
+  </div>
+  <br>
+
+<div id="editor" class="feditor">
+
+</div>
+
+</div>
+</body>
+
+
+<!-- Include the Quill library -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- Initialize Quill editor -->
+<script>
+  var editor = new Quill('#editor', {
+    modules: { toolbar: "#toolbar" },
+    theme: 'snow'
+  });
+
+  editor.keyboard.addBinding({ key: 'escape' }, function(range) {
+    //console.log(ln.length);
+    //  console.log("SMALL");
+     editor.removeFormat(range.index, 4);
+    return true;
+  });
+
+
+  editor.on('text-change', function(delta, oldDelta, source) {
+
+    var range = editor.getSelection();
+    if (range) {
+      if (range.length == 0) {
+//console.log(delta);
+try{
+  let [line, offset] = editor.getLine(range.index);
+  var ln = line.children.head.text;
+
+  if(typeof delta.ops[1].insert != 'undefined'){
+
+  if(delta.ops[1].insert.charCodeAt(0) == 10){
+
+    if(ln.includes("FADE IN:") || ln.includes("FADE OUT:") || ln.includes("CUT TO:") || ln.includes("DISOLVE TO:")){
+
+      console.log("'FADE IN:' Located and formatted to right. " + range.index + " / " + offset);
+      editor.formatLine(range.index-1, 4, "align", "right");
+      editor.removeFormat(range.index+1, 4);
+    //  console.log(line);
+
+    }
+    if (ln.includes("INT.")) {
+
+      console.log("'INT.' Located and formatted to align left & bolded. " + range.index + " / " + offset);
+      editor.formatText(range.index-offset, offset, "bold", true);
+      //console.log(line);
+
+    }
+    if (ln.includes("(") && ln.includes(")")) {
+
+      console.log("'(ex)' Panrenthetical line parsed. " + range.index + " / " + offset);
+        editor.removeFormat(range.index-1, 4);
+      editor.formatLine(range.index-1, 4, "align", "center");
+      editor.removeFormat(range.index+1, 4);
+      editor.formatLine(range.index+1, 4, "indent", +3);
+    //  console.log(line);
+
+    }
+    if (ln == ln.toUpperCase() && !ln.includes("INT.") && !ln.includes("EXT.") && !ln.includes("FADE IN:") && !ln.includes("FADE OUT:") && !ln.includes("CUT TO:") && !ln.includes("DISSOLVE TO:")) {
+
+      console.log("'"+ln+"' Located and parsed as 'CHARACTER', center aligned. " + range.index + " / " + offset);
+      editor.formatLine(range.index-1, 4, "align", "center");
+      editor.removeFormat(range.index+1, 4);
+      editor.formatLine(range.index+1, 4, "indent", +3);
+      //indent
+    //  console.log(line);
+
+    }
+
+
+
+  }
+  //  editor.removeFormat(range.index, 0);
+
+}
+}catch{
+
+}
+
+        //console.log(delta);
+
+
+
+      }
+    }
+
+  });
+
+  $("#save").click(saveFile);
+
+  function saveFile(){
+
+    $.post( "scripts/save.php", { data: $("#editor").html() } )
+  }
+
+
+
+
+</script>
