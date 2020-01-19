@@ -27,7 +27,7 @@ function logstatus(){
 $userid2 = logstatus();
 	function querys($sql, $tar) {
 
-$conn = new mysqli("localhost", "admin_flix", "Zaq1xsw2", "admin_flix");
+$conn = new mysqli("localhost", "admin_flix", "toor", "admin_flix");
 
 $result = $conn->query($sql);
 
